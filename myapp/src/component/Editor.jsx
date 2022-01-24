@@ -48,11 +48,27 @@ const Editor = () => {
     useEffect(() => {
         const socketServer = io('http://localhost:9000');
         setSocket(socketServer);
-        
+
         return () => {
             socketServer.disconnect();
         }
-    })
+    },[])
+    
+   useEffect(() => {
+    if(socket === null || quill === null) return;
+
+       const handleChange= (delta, oldDelta, source) =>{
+        if(source!= 'user') return ;
+        socket && socket.emit('send-changes',delta);
+
+       }
+      quill && quill.on('text-change',handleChange);
+
+          return () => {
+          quill &&  quill.off('text-change', handleChange);
+          }
+      },[quill, socket])
+   
 
 
     return (
