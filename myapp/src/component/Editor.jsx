@@ -4,6 +4,8 @@ import 'quill/dist/quill.snow.css';
 import { useEffect, useState } from 'react';
 import styled from '@emotion/styled';
 
+import { useParams } from 'react-router-dom';
+
 import { io } from 'socket.io-client';
 
 
@@ -38,10 +40,12 @@ const Editor = () => {
 
     const [socket, setSocket] = useState();
     const [quill, setQuill] = useState();
-
+    const { id } = useParams();
 
     useEffect(()=> {
-       const quillServer = new Quill('#container',{theme: 'snow', modules: {toolbar: toolbarOptions}})
+       const quillServer = new Quill('#container',{theme: 'snow', modules: {toolbar: toolbarOptions}});
+       quillServer.disable();
+       quillServer.setText('Your text will be displayed...');
        setQuill(quillServer);
     }, []);
 
@@ -68,6 +72,40 @@ const Editor = () => {
           quill &&  quill.off('text-change', handleChange);
           }
       },[quill, socket])
+
+
+      useEffect(() => {
+        if(socket === null || quill === null) return;
+    
+           const handleChange = (delta) =>{
+            
+            quill.updateContents(delta);
+    
+           }
+          socket && socket.on('receive-changes',handleChange);
+    
+              return () => {
+              socket &&  socket.off('receive-changes', handleChange);
+              }
+          },[quill, socket])
+
+
+    useEffect(() => {
+        if(quill == null || socket == null)
+        return
+
+        socket && socket.once('load-document', document => {
+            quill && quill.setContents(document);
+            quill && quill.enable();
+        })
+        socket && socket.emit('get-document' ,id);
+
+    },[quill, socket, id]);
+
+
+
+
+
    
 
 
