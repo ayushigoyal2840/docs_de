@@ -11,6 +11,7 @@
   "author": "ayushi",
   "license": "ISC",
   "dependencies": {
+    "mongoose": "^6.1.8",
     "nodemon": "^2.0.15",
     "socket.io": "^4.4.1"
   }
